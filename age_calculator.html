@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Age Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f8fafa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            background: yellow;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .result-card {
+            background: linear-gradient(135deg, #eff6cc 0%, #dbeafe 100%);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="card w-full max-w-md p-8">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-black text-blue-700 uppercase tracking-tight">
+                Age Calculator
+            </h2>
+            <p class="text-gray-500 text-sm mt-1 font-bold italic">Developed By Asif Ali in the memory of Dr, Ajmal Laghari </p>
+        </div>
+        
+        <div class="space-y-6">
+            <!-- Admission Date (The larger date we subtract from) -->
+            <div>
+                <label class="block text-xs font-bold text-black-600 uppercase tracking-widest mb-2 ml-1">Admission Date (Dakhila Tareekh)</label>
+                <input type="date" id="admissionDate" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition-all font-semibold">
+            </div>
+
+            <!-- Date of Birth (The smaller date we subtract) -->
+            <div>
+                <label class="block text-xs font-bold text-black-400 uppercase tracking-widest mb-2 ml-1">Date of Birth (Janam Din)</label>
+                <input type="date" id="dob" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-blue-500 focus:bg-white outline-none transition-all font-semibold">
+            </div>
+
+            <!-- Calculate Button -->
+            <button onclick="calculateAge()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition duration-300 shadow-xl shadow-blue-200 transform active:scale-95 text-lg uppercase">
+                 Calculate Student Age
+            </button>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultBox" class="mt-8 hidden animate-bounce-short">
+            <div class="result-card p-6 rounded-3xl border border-blue-200 shadow-inner">
+                <h3 class="text-xs font-black text-black-500 mb-4 text-center uppercase tracking-widest">Final Calculation Result</h3>
+                <div class="flex justify-between items-center px-2">
+                    <div class="text-center">
+                        <span id="years" class="block text-4xl font-black text-black-900">0</span>
+                        <span class="text-[10px] font-bold text-black-400 uppercase">Saal</span>
+                    </div>
+                    <div class="h-10 w-[2px] bg-blue-200 rounded-full"></div>
+                    <div class="text-center">
+                        <span id="months" class="block text-4xl font-black text-black-900">0</span>
+                        <span class="text-[10px] font-bold text-black-400 uppercase">Mahine</span>
+                    </div>
+                    <div class="h-10 w-[2px] bg-blue-200 rounded-full"></div>
+                    <div class="text-center">
+                        <span id="days" class="block text-4xl font-black text-black-900">0</span>
+                        <span class="text-[10px] font-bold text-black-400 uppercase">Din</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-white border border-gray-100 rounded-xl text-center">
+                <p id="fullString" class="text-gray-700 font-bold"></p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorBox" class="mt-4 hidden p-4 bg-red-50 text-red-600 text-xs font-black rounded-2xl text-center border border-red-100 uppercase tracking-tighter">
+        </div>
+    </div>
+
+    <script>
+        function calculateAge() {
+            const dobVal = document.getElementById('dob').value;
+            const admVal = document.getElementById('admissionDate').value;
+            const resultBox = document.getElementById('resultBox');
+            const errorBox = document.getElementById('errorBox');
+
+            if (!dobVal || !admVal) {
+                errorBox.innerText = "Error: Dono dates select karein!";
+                errorBox.classList.remove('hidden');
+                resultBox.classList.add('hidden');
+                return;
+            }
+
+            const birth = new Date(dobVal);
+            const admission = new Date(admVal);
+
+            if (admission < birth) {
+                errorBox.innerText = "Galti: Admission date DOB se badi honi chahiye!";
+                errorBox.classList.remove('hidden');
+                resultBox.classList.add('hidden');
+                return;
+            }
+
+            errorBox.classList.add('hidden');
+
+            // Values Split
+            let d1 = birth.getDate();
+            let m1 = birthDateFix(birth.getMonth() + 1);
+            let y1 = birth.getFullYear();
+
+            let d2 = admission.getDate();
+            let m2 = admission.getMonth() + 1;
+            let y2 = admission.getFullYear();
+
+            // Logic: SUBTRACTION (Borrowing Method)
+            
+            // 1. Din Borrow Karein (If D2 < D1)
+            if (d2 < d1) {
+                // Pichle mahine ki akhri date (dino ki ginti) maloom karein
+                let daysInPrevMonth = new Date(y2, m2 - 1, 0).getDate();
+                d2 = d2 + daysInPrevMonth;
+                m2 = m2 - 1;
+            }
+
+            // 2. Mahine Borrow Karein (If M2 < M1)
+            if (m2 < m1) {
+                m2 = m2 + 12;
+                y2 = y2 - 1;
+            }
+
+            let finalDays = d2 - d1;
+            let finalMonths = m2 - m1;
+            let finalYears = y2 - y1;
+
+            // Output
+            document.getElementById('years').innerText = finalYears;
+            document.getElementById('months').innerText = finalMonths;
+            document.getElementById('days').innerText = finalDays;
+            
+            document.getElementById('fullString').innerText = 
+                `${finalYears} saal, ${finalMonths} mahine, ${finalDays} din`;
+            
+            resultBox.classList.remove('hidden');
+        }
+
+        // Fix for JavaScript getMonth() behavior in manual subtraction
+        function birthDateFix(m) { return m; }
+
+        window.onload = () => {
+            // Pre-fill dates for testing (Optional)
+            document.getElementById('admissionDate').value = "2025-04-08";
+            document.getElementById('dob').value = "2020-05-03";
+        };
+    </script>
+</body>
+</html>
